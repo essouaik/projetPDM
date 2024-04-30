@@ -4,10 +4,14 @@ Welcome to the official repository of Order n'Cook, the mobile application that 
 
 # Features 
 
-Browse Recipes: Explore a wide variety of recipes from around the world. \n
-Order Ingredients: Get fresh ingredients delivered to your home with just a few clicks. \n
-Recipe Guidance: Follow step-by-step cooking instructions provided in the app. \n
-Customizable Portions: Adjust the quantity of ingredients based on the number of servings you need. \n
+Browse Recipes: Explore a wide variety of recipes from around the world. 
+
+Order Ingredients: Get fresh ingredients delivered to your home with just a few clicks. 
+
+Recipe Guidance: Follow step-by-step cooking instructions provided in the app. 
+
+Customizable Portions: Adjust the quantity of ingredients based on the number of servings you need. 
+
 Save Favorites: Keep a list of your favorite recipes for easy access.
 
 ```bash
