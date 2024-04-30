@@ -1,3 +1,19 @@
+# Order n'Cook
+
+Welcome to the official repository of Order n'Cook, the mobile application that revolutionizes home cooking by enabling users to order ingredients directly as they browse recipes. Our app aims to simplify meal preparation by delivering fresh ingredients to your door, tailored to the recipes you want to try
+
+# Features 
+
+Browse Recipes: Explore a wide variety of recipes from around the world.
+Order Ingredients: Get fresh ingredients delivered to your home with just a few clicks.
+Recipe Guidance: Follow step-by-step cooking instructions provided in the app.
+Customizable Portions: Adjust the quantity of ingredients based on the number of servings you need.
+Save Favorites: Keep a list of your favorite recipes for easy access.
+
+```bash
+git clone https://github.com/yourusername/order-n-cook.git
+cd order-n-cook
+```
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
 # Getting Started
@@ -46,14 +62,6 @@ If everything is set up _correctly_, you should see your new app running in your
 
 This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
 
-## Step 3: Modifying your App
-
-Now that you have successfully run the app, let's modify it.
-
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
-
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
 
 ## Congratulations! :tada:
 
