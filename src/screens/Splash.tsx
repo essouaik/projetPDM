@@ -1,32 +1,63 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Image, Animated } from 'react-native';
+import React, {useEffect} from 'react';
+import {View, Image, StyleSheet, Animated, Easing} from 'react-native';
 
-const SplashScreen = ({ navigation }) => {
-  const fadeAnim = new Animated.Value(0);  // Initial value for opacity
+const SplashScreen = ({navigation}) => {
+  const fadeAnim = new Animated.Value(0); // Initial value for opacity
+  const scaleAnim = new Animated.Value(0.5); // Initial value for scaling
+  const rotateAnim = new Animated.Value(0); // Initial value for rotation
 
   useEffect(() => {
     const timer = setTimeout(() => {
       navigation.replace('Home');
     }, 3000); // 3 seconds
 
-    // Start fade-in animation
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 2000,
-      useNativeDriver: true,
-    }).start();
+    // Start fade-in, scale, and rotation animations
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 2000,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 2000,
+        easing: Easing.bounce,
+        useNativeDriver: true,
+      }),
+      Animated.timing(rotateAnim, {
+        toValue: 1,
+        duration: 2000,
+        easing: Easing.ease,
+        useNativeDriver: true,
+      }),
+    ]).start();
 
     return () => clearTimeout(timer);
   }, [navigation]);
 
   return (
     <View style={styles.container}>
-      <Animated.View style={{ ...styles.logoContainer, opacity: fadeAnim }}>
-
+      <Animated.View
+        style={[
+          styles.logoContainer,
+          {
+            opacity: fadeAnim,
+            transform: [
+              {scale: scaleAnim},
+              {
+                rotate: rotateAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: ['0deg', '360deg'],
+                }),
+              },
+            ],
+          },
+        ]}>
+        <Image
+          source={require('../img/splash.png')} // Replace with your image path
+          style={styles.logo}
+        />
       </Animated.View>
-      <Animated.Text style={{ ...styles.text, opacity: fadeAnim }}>
-        Hol' Up
-      </Animated.Text>
     </View>
   );
 };
@@ -36,20 +67,15 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#4a90e2', 
+    backgroundColor: '#B22222', // Matching background color of the image
   },
   logoContainer: {
-    marginBottom: 20,
+    alignItems: 'center',
   },
   logo: {
-    width: 100,
-    height: 100, 
+    width: 300,
+    height: 300,
     resizeMode: 'contain',
-  },
-  text: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff', 
   },
 });
 
