@@ -8,16 +8,38 @@ import {
   TextInput,
   ImageBackground,
   SafeAreaView,
+  Modal,
+  ScrollView,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useEffect, useState} from 'react';
 
 const HomeScreen = () => {
   const [dishesData, setDishesData] = useState([]);
+  const [categData, setCategData] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const navigation = useNavigation();
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchInitialData = async () => {
+      try {
+        const response = await fetch(
+          'https://www.themealdb.com/api/json/v1/1/categories.php',
+          {},
+        );
+        const data = await response.json();
+        setCategData(data.categories);
+      } catch (error) {
+        console.error('Error fetching initial data:', error);
+      }
+    };
+    
+    fetchInitialData();
+  }, []);
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
       try {
         const response = await fetch(
           'https://www.themealdb.com/api/json/v1/1/search.php?s=',
@@ -26,11 +48,47 @@ const HomeScreen = () => {
         const data = await response.json();
         setDishesData(data.meals);
       } catch (error) {
+        console.error('Error fetching initial data:', error);
+      }
+    };
+    
+    fetchInitialData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          `https://www.themealdb.com/api/json/v1/1/search.php?s=${searchTerm}`,
+          {},
+        );
+        const data = await response.json();
+        setDishesData(data.meals);
+      } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
-    fetchData();
-  }, []);
+
+    if (searchTerm) {
+      fetchData();
+    }
+  }, [searchTerm]);
+
+  const handleCategorySelect = async (category) => {
+    try {
+      const response = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`);
+     
+      const dat = await response.json();
+      const resp = await fetch(
+        `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${dat.idMeal}`,
+      );
+      const data = await resp.json();
+      setDishesData(data.meals);
+      setIsDropdownVisible(false);
+    } catch (error) {
+      console.error('Error fetching data by category:', error);
+    }
+  };
 
   const renderDish = ({item}) => (
     <TouchableOpacity
@@ -75,6 +133,8 @@ const HomeScreen = () => {
                 <TextInput
                   style={styles.searchInput}
                   placeholder="Search here"
+                  value={searchTerm}
+                  onChangeText={(text) => setSearchTerm(text)}
                 />
                 <TouchableOpacity style={styles.filterButton}>
                   <Image
@@ -99,8 +159,8 @@ const HomeScreen = () => {
                 <TouchableOpacity style={styles.tabButton}>
                   <Text style={styles.tabButtonText}>All</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tabButton}>
-                  <Text style={styles.tabButtonText}>Asian</Text>
+                <TouchableOpacity style={styles.tabButton} onPress={() => setIsDropdownVisible(true)}>
+                  <Text style={styles.tabButtonText}>Category</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.tabButton}>
                   <Text style={styles.tabButtonText}>Drink</Text>
@@ -115,6 +175,24 @@ const HomeScreen = () => {
           contentContainerStyle={styles.list}
         />
       </SafeAreaView>
+      <Modal
+        visible={isDropdownVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setIsDropdownVisible(false)}>
+        <TouchableOpacity style={styles.modalOverlay} onPress={() => setIsDropdownVisible(false)}>
+          <View style={styles.dropdownContainer}>
+            <ScrollView>
+              {categData.map((category) => (
+                <TouchableOpacity key={category.idCategory} style={styles.dropdownItem}
+                                  onPress={() => handleCategorySelect(category.strCategory)}>
+                  <Text style={styles.dropdownItemText}>{category.strCategory}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </ImageBackground>
   );
 };
@@ -247,6 +325,27 @@ const styles = StyleSheet.create({
   dishOrigin: {
     fontSize: 14,
     color: '#666666',
+  },
+  dropdownItemText: {
+    fontSize: 16,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dropdownContainer: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 20,
+    width: '80%',
+    maxHeight: '50%',
+  },
+  dropdownItem: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
   },
 });
 
