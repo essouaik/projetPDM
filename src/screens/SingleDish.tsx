@@ -1,5 +1,6 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  Alert,
   View,
   Text,
   ActivityIndicator,
@@ -10,16 +11,19 @@ import {
   ImageBackground,
   Image,
 } from 'react-native';
-import {Card, Button} from 'react-native-paper';
-import {useNavigation} from '@react-navigation/native';
+import { Card, Button } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
+import { addItem } from '../redux/slices/cartSlice';
 
-const SingleDish = ({route}) => {
-  const {dishId} = route.params;
+const SingleDish = ({ route }) => {
+  const { dishId } = route.params;
   const [dishData, setDishData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
   const [expandedIng, setExpandedIng] = useState(false);
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,10 +43,21 @@ const SingleDish = ({route}) => {
     fetchData();
   }, [dishId]);
 
-  const formatInstructions = instructions => {
+  const handleAddToCart = () => {
+    const item = {
+      id: dishData.idMeal,
+      title: dishData.strMeal,
+      price: Math.floor(Math.random() * 10) + 10,
+      image: dishData.strMealThumb,
+    };
+    Alert.alert('Added to cart', `${dishData.strMeal} has been added to your cart.`);
+    dispatch(addItem(item));
+  };
+
+  const formatInstructions = (instructions) => {
     const sentences = instructions.split('.');
     const filteredSentences = sentences.filter(
-      sentence => sentence.trim() !== '',
+      (sentence) => sentence.trim() !== '',
     );
 
     return filteredSentences.map((sentence, index) => (
@@ -72,13 +87,13 @@ const SingleDish = ({route}) => {
 
   return (
     <ImageBackground
-      source={require('../img/image.png')} // Replace with your background image path
+      source={require('../img/image.png')}
       style={styles.backgroundImage}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
           <View style={styles.card}>
             <Image
-              source={{uri: dishData.strMealThumb}}
+              source={{ uri: dishData.strMealThumb }}
               style={styles.cardImage}
             />
             <Text style={styles.cardTitle}>{dishData.strMeal}</Text>
@@ -111,7 +126,7 @@ const SingleDish = ({route}) => {
             <View style={styles.expandedSection}>
               {Object.keys(dishData).map((key, index) => {
                 if (key.startsWith('strIngredient')) {
-                  const ingredientNumber = key.slice(13); // Récupère le numéro de l'ingrédient
+                  const ingredientNumber = key.slice(13);
                   const ingredient = dishData[key];
                   const measureKey = `strMeasure${ingredientNumber}`;
                   const measure = dishData[measureKey];
@@ -122,24 +137,32 @@ const SingleDish = ({route}) => {
                     </View>
                   );
                 }
-                return null; // Ignorer les clés autres que strIngredientX
+                return null;
               })}
             </View>
           )}
 
-          <Button
-            mode="contained"
-            onPress={() => navigation.navigate('Home')}
-            style={styles.homeButton}>
-            Retour à l'accueil
-          </Button>
+          <View style={styles.buttonContainer}>
+            <Button
+              mode="contained"
+              onPress={() => navigation.navigate('Home')}
+              style={styles.homeButton}>
+              ◀ Back
+            </Button>
+            <Button
+              mode="contained"
+              onPress={handleAddToCart}
+              style={styles.homeButton}>
+              🛒 Add to cart
+            </Button>
+          </View>
         </View>
       </ScrollView>
     </ImageBackground>
   );
 };
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   backgroundImage: {
@@ -158,6 +181,11 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     alignItems: 'center',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
   },
   card: {
     width: '100%',
@@ -210,7 +238,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     elevation: 4,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
   },
@@ -240,8 +268,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF6F61',
     elevation: 4,
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     borderRadius: 8,
+    marginRight: 10,
   },
   loadingIndicator: {
     flex: 1,

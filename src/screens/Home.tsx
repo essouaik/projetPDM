@@ -17,10 +17,15 @@ import {useEffect, useState} from 'react';
 const HomeScreen = () => {
   const [dishesData, setDishesData] = useState([]);
   const [categData, setCategData] = useState([]);
+  const [areaData, setAreaData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currCategory, setCurrCategory] = useState('Category');
+  const [currArea, setCurrArea] = useState('Area');
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const [isAreaDropdownVisible, setIsAreaDropdownVisible] = useState(false);
   const navigation = useNavigation();
 
+  // fetch all categories 
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
@@ -38,15 +43,16 @@ const HomeScreen = () => {
     fetchInitialData();
   }, []);
 
+  // fetch all areas
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
         const response = await fetch(
-          'https://www.themealdb.com/api/json/v1/1/search.php?s=',
+          'https://www.themealdb.com/api/json/v1/1/list.php?a=list',
           {},
         );
         const data = await response.json();
-        setDishesData(data.meals);
+        setAreaData(data.meals);
       } catch (error) {
         console.error('Error fetching initial data:', error);
       }
@@ -55,6 +61,28 @@ const HomeScreen = () => {
     fetchInitialData();
   }, []);
 
+  const fetchInitialData = async () => {
+    try {
+      const response = await fetch(
+        'https://www.themealdb.com/api/json/v1/1/search.php?s=',
+        {},
+      );
+      const data = await response.json();
+      setDishesData(data.meals);
+    } catch (error) {
+      console.error('Error fetching initial data:', error);
+    }
+  };
+
+  useEffect(() => {    
+    fetchInitialData();
+  }, []);
+
+  const fetchAllMeals = ()=>{
+    fetchInitialData();
+    setCurrCategory("Category")
+    setCurrArea("Area")
+  }
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -77,18 +105,45 @@ const HomeScreen = () => {
   const handleCategorySelect = async (category) => {
     try {
       const response = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`);
-     
       const dat = await response.json();
-      const resp = await fetch(
-        `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${dat.idMeal}`,
-      );
-      const data = await resp.json();
-      setDishesData(data.meals);
+      
+      const mealDetailsPromises = dat.meals.map(async meal => {
+        const resp = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.idMeal}`);
+        return resp.json();
+      });
+  
+      const mealsDetails = await Promise.all(mealDetailsPromises);
+      const detailedMeals = mealsDetails.map(mealData => mealData.meals[0]);
+      setCurrCategory(category)
+      setDishesData(detailedMeals);
       setIsDropdownVisible(false);
+      setCurrArea("Area")
     } catch (error) {
       console.error('Error fetching data by category:', error);
     }
   };
+
+  const handleAreaSelect = async (area) => {
+    try {
+      const response = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?a=${area}`);
+      const dat = await response.json();
+      
+      const mealDetailsPromises = dat.meals.map(async meal => {
+        const resp = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.idMeal}`);
+        return resp.json();
+      });
+  
+      const mealsDetails = await Promise.all(mealDetailsPromises);
+      const detailedMeals = mealsDetails.map(mealData => mealData.meals[0]);
+      setCurrArea(area)
+      setDishesData(detailedMeals);
+      setIsAreaDropdownVisible(false);
+      setCurrCategory("Category")
+    } catch (error) {
+      console.error('Error fetching data by category:', error);
+    }
+  };
+  
 
   const renderDish = ({item}) => (
     <TouchableOpacity
@@ -151,19 +206,19 @@ const HomeScreen = () => {
                 />
                 <Text style={styles.bannerText}>Recipe in Minutes!</Text>
                 <Text style={styles.bannerSubText}>
-                  Available 1 December - 30 December 2023
+                  Available 1 August 2024
                 </Text>
               </View>
 
               <View style={styles.tabsContainer}>
-                <TouchableOpacity style={styles.tabButton}>
+                <TouchableOpacity style={styles.tabButton} onPress={() => fetchAllMeals()}>
                   <Text style={styles.tabButtonText}>All</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.tabButton} onPress={() => setIsDropdownVisible(true)}>
-                  <Text style={styles.tabButtonText}>Category</Text>
+                  <Text style={styles.tabButtonText}>{currCategory}</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.tabButton}>
-                  <Text style={styles.tabButtonText}>Drink</Text>
+                <TouchableOpacity style={styles.tabButton} onPress={() => setIsAreaDropdownVisible(true)}>
+                  <Text style={styles.tabButtonText}>{currArea}</Text>
                 </TouchableOpacity>
               </View>
             </>
@@ -187,6 +242,25 @@ const HomeScreen = () => {
                 <TouchableOpacity key={category.idCategory} style={styles.dropdownItem}
                                   onPress={() => handleCategorySelect(category.strCategory)}>
                   <Text style={styles.dropdownItemText}>{category.strCategory}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      <Modal
+        visible={isAreaDropdownVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setIsAreaDropdownVisible(false)}>
+        <TouchableOpacity style={styles.modalOverlay} onPress={() => setIsAreaDropdownVisible(false)}>
+          <View style={styles.dropdownContainer}>
+            <ScrollView>
+              {areaData.map((area) => (
+                <TouchableOpacity key={area.idArea} style={styles.dropdownItem}
+                                  onPress={() => handleAreaSelect(area.strArea)}>
+                  <Text style={styles.dropdownItemText}>{area.strArea}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>

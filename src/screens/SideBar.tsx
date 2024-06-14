@@ -9,17 +9,17 @@ const CustomDrawerContent = ({navigation}) => {
           source={require('../img/splash.png')}
           style={styles.profilePic}
         />
-        <Text style={styles.userName}>Moumou </Text>
+        <Text style={styles.userName}>Moumou</Text>
       </View>
       <View style={styles.drawerSection}>
         <TouchableOpacity onPress={() => navigation.navigate('Home')}>
           <Text style={styles.drawerItem}>Home</Text>
         </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('Cart')}>
+          <Text style={styles.drawerItem}>Cart</Text>
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
           <Text style={styles.drawerItem}>Profile</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
-          <Text style={styles.drawerItem}>Settings</Text>
         </TouchableOpacity>
       </View>
     </View>

@@ -6,6 +6,9 @@ import HomeScreen from './src/screens/Home';
 import SplashScreen from './src/screens/Splash';
 import SingleDish from './src/screens/SingleDish';
 import CustomDrawerContent from './src/screens/SideBar';
+import Cart from './src/screens/Cart';
+import { Provider } from 'react-redux';
+import { store } from './src/redux/store';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -13,11 +16,14 @@ const Drawer = createDrawerNavigator();
 // Define your stack navigator as before
 function MyStack() {
   return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
-      <Stack.Screen name="Splash" component={SplashScreen} />
-      <Stack.Screen name="Home" component={HomeScreen} />
-      <Stack.Screen name="SingleDish" component={SingleDish} />
-    </Stack.Navigator>
+    <Provider store={store}>
+      <Stack.Navigator screenOptions={{headerShown: false}}>
+        <Stack.Screen name="Splash" component={SplashScreen} />
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="SingleDish" component={SingleDish} />
+        <Stack.Screen name="Cart" component={Cart} />
+      </Stack.Navigator>
+    </Provider>
   );
 }
 
