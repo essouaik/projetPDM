@@ -54,7 +54,7 @@ const SplashScreen = ({navigation}) => {
           },
         ]}>
         <Image
-          source={require('../img/splash.png')} // Replace with your image path
+          source={require('../img/logoWithoutBg1.png')} // Replace with your image path
           style={styles.logo}
         />
       </Animated.View>
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#B22222', // Matching background color of the image
+    backgroundColor: '#067A46', 
   },
   logoContainer: {
     alignItems: 'center',

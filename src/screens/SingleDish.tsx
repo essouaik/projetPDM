@@ -15,6 +15,7 @@ import { Card, Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { addItem } from '../redux/slices/cartSlice';
+import { fetchDishById } from '../api';
 
 const SingleDish = ({ route }) => {
   const { dishId } = route.params;
@@ -22,17 +23,15 @@ const SingleDish = ({ route }) => {
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
   const [expandedIng, setExpandedIng] = useState(false);
+  const [price, setPrice] = useState(Math.floor(Math.random() * 10) + 10)
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${dishId}`,
-        );
-        const data = await response.json();
-        setDishData(data.meals[0]);
+        const data = await fetchDishById(dishId);
+        setDishData(data);
       } catch (error) {
         console.error('Erreur lors de la récupération des données:', error);
       } finally {
@@ -47,7 +46,7 @@ const SingleDish = ({ route }) => {
     const item = {
       id: dishData.idMeal,
       title: dishData.strMeal,
-      price: Math.floor(Math.random() * 10) + 10,
+      price: price,
       image: dishData.strMealThumb,
     };
     Alert.alert('Added to cart', `${dishData.strMeal} has been added to your cart.`);
@@ -86,9 +85,14 @@ const SingleDish = ({ route }) => {
   }
 
   return (
-    <ImageBackground
-      source={require('../img/image.png')}
-      style={styles.backgroundImage}>
+    <View style={styles.containerGlobal}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.openDrawer()}>
+          <Text style={styles.hamburger}>☰</Text>
+        </TouchableOpacity>
+        <Text style={styles.title}>Order&Go</Text>
+        <TouchableOpacity></TouchableOpacity>
+      </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.container}>
           <View style={styles.card}>
@@ -110,9 +114,9 @@ const SingleDish = ({ route }) => {
           </TouchableOpacity>
 
           {expanded && (
-            <View style={styles.expandedSection}>
+            <ScrollView style={styles.expandedSection}>
               {formatInstructions(dishData.strInstructions)}
-            </View>
+            </ScrollView>
           )}
 
           <TouchableOpacity
@@ -123,7 +127,7 @@ const SingleDish = ({ route }) => {
           </TouchableOpacity>
 
           {expandedIng && (
-            <View style={styles.expandedSection}>
+            <ScrollView style={styles.expandedSection}>
               {Object.keys(dishData).map((key, index) => {
                 if (key.startsWith('strIngredient')) {
                   const ingredientNumber = key.slice(13);
@@ -139,7 +143,7 @@ const SingleDish = ({ route }) => {
                 }
                 return null;
               })}
-            </View>
+            </ScrollView>
           )}
 
           <View style={styles.buttonContainer}>
@@ -158,16 +162,16 @@ const SingleDish = ({ route }) => {
           </View>
         </View>
       </ScrollView>
-    </ImageBackground>
+    </View>
   );
 };
 
 const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
-  backgroundImage: {
+  containerGlobal: {
     flex: 1,
-    resizeMode: 'cover',
+    backgroundColor: '#7dcbb7', // Fond global
   },
   scrollContainer: {
     flexGrow: 1,
@@ -201,13 +205,13 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontWeight: 'bold',
     fontSize: 24,
-    color: '#FF6F61',
+    color: '#047a46',
     textAlign: 'center',
     marginVertical: 12,
   },
   categoryAreaText: {
     fontSize: 18,
-    color: '#FF6F61',
+    color: '#047a46',
     textAlign: 'center',
   },
   touchable: {
@@ -224,11 +228,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#FF6F61',
+    color: '#047a46',
   },
   chevron: {
     fontSize: 24,
-    color: '#FF6F61',
+    color: '#047a46',
   },
   expandedSection: {
     width: '100%',
@@ -265,7 +269,7 @@ const styles = StyleSheet.create({
   },
   homeButton: {
     marginTop: 24,
-    backgroundColor: '#FF6F61',
+    backgroundColor: '#047a46',
     elevation: 4,
     paddingVertical: 10,
     paddingHorizontal: 10,
@@ -281,6 +285,23 @@ const styles = StyleSheet.create({
     color: '#FF6F61',
     textAlign: 'center',
     fontSize: 18,
+    fontWeight: 'bold',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#7dcbb7',
+  },
+  hamburger: {
+    color: '#fff',
+    fontSize: 28,
+    fontWeight: 'bold',
+  },
+  title: {
+    color: '#fff',
+    fontSize: 24,
     fontWeight: 'bold',
   },
 });

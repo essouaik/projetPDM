@@ -13,7 +13,15 @@ const Cart = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Cart</Text>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.openDrawer()}>
+          <Text style={styles.hamburger}>☰</Text>
+        </TouchableOpacity>
+        <Text style={styles.title}>Cart</Text>
+        <TouchableOpacity>
+
+        </TouchableOpacity>
+      </View>
       {cartItems.length === 0 ? (
         <Text style={styles.emptyCartText}>Your cart is empty.</Text>
       ) : (
@@ -38,7 +46,7 @@ const Cart = ({ navigation }) => {
                   </View>
                 </View>
                 <TouchableOpacity onPress={() => dispatch(removeItem(item.id))}>
-                  <Text style={styles.removeButton}>Remove</Text>
+                  <Text style={styles.removeButton}>❌</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -48,13 +56,19 @@ const Cart = ({ navigation }) => {
           </View>
         </>
       )}
-      <View style={styles.buttonContainer}>
-        <Text onPress={() => navigation.goBack()} style={styles.homeButton}>◀ Back</Text>
+    <View style={styles.buttonContainer}>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.homeButton}>
+        <Text style={styles.buttonText}>◀ Back</Text>
+      </TouchableOpacity>
 
-{cartItems.length !== 0 ? (
-        <Text onPress={() => navigation.goBack()} style={styles.homeButton}>Pay</Text>
-    ) : <Text></Text>}
-      </View>
+      {cartItems.length !== 0 ? (
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.payButton}>
+          <Text style={styles.buttonText}>Pay</Text>
+        </TouchableOpacity>
+      ) : (
+        <Text></Text>
+      )}
+    </View>
     </View>
   );    
 };
@@ -67,7 +81,20 @@ const styles = StyleSheet.create({
     },
     homeButton: {
         marginTop: 24,
-        backgroundColor: '#FF6F61',
+        backgroundColor: '#047a46',
+        elevation: 4,
+        paddingVertical: 10,
+        paddingHorizontal: 10,
+        borderRadius: 8,
+        marginRight: 10,
+        width: 150, 
+        alignItems: 'center', 
+        fontSize: 18,
+        color: '#fff',
+      },
+      payButton: {
+        marginTop: 24,
+        backgroundColor: '#047a46',
         elevation: 4,
         paddingVertical: 10,
         paddingHorizontal: 10,
@@ -86,9 +113,9 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 16,
+        marginBottom: 1,
         textAlign: 'center',
-        color: '#FF6F61',
+        color: '#047a46',
     },
     emptyCartText: {
         fontSize: 18,
@@ -134,14 +161,14 @@ const styles = StyleSheet.create({
     quantityButton: {
         fontSize: 24,
         paddingHorizontal: 10,
-        color: '#FF6F61',
+        color: '#047a46',
     },
     quantityText: {
         fontSize: 18,
         marginHorizontal: 10,
     },
     removeButton: {
-        color: 'red',
+        color: '#047a46',
         fontWeight: 'bold',
         marginLeft: 10,
     },
@@ -156,7 +183,23 @@ const styles = StyleSheet.create({
     totalText: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#FF6F61',
+        color: '#047a46',
+    },
+    buttonText:{
+      color : '#fff',
+      fontWeight: 'bold',
+      fontSize: 20
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: 16,
+    },
+    hamburger: {
+      color: '#047a46',
+      fontSize: 28,
+      fontWeight: 'bold',
     },
 });
 

@@ -6,7 +6,7 @@ const CustomDrawerContent = ({navigation}) => {
     <View style={styles.drawerContent}>
       <View style={styles.userInfoSection}>
         <Image
-          source={require('../img/splash.png')}
+          source={require('../img/kbayer.jpg')}
           style={styles.profilePic}
         />
         <Text style={styles.userName}>Moumou</Text>

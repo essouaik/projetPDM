@@ -6,13 +6,20 @@ import {
   StyleSheet,
   Image,
   TextInput,
-  ImageBackground,
   SafeAreaView,
   Modal,
   ScrollView,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useEffect, useState} from 'react';
+import {
+  fetchCategories,
+  fetchAreas,
+  fetchMeals,
+  fetchMealsBySearch,
+  fetchMealsByCategory,
+  fetchMealsByArea,
+} from '../api';
 
 const HomeScreen = () => {
   const [dishesData, setDishesData] = useState([]);
@@ -27,120 +34,91 @@ const HomeScreen = () => {
 
   // fetch all categories 
   useEffect(() => {
-    const fetchInitialData = async () => {
+    const fetchInitialCategories = async () => {
       try {
-        const response = await fetch(
-          'https://www.themealdb.com/api/json/v1/1/categories.php',
-          {},
-        );
-        const data = await response.json();
-        setCategData(data.categories);
+        const categories = await fetchCategories();
+        setCategData(categories);
       } catch (error) {
-        console.error('Error fetching initial data:', error);
+        console.error('Error fetching initial categories:', error);
       }
     };
-    
-    fetchInitialData();
+
+    fetchInitialCategories();
   }, []);
 
-  // fetch all areas
   useEffect(() => {
-    const fetchInitialData = async () => {
+    const fetchInitialAreas = async () => {
       try {
-        const response = await fetch(
-          'https://www.themealdb.com/api/json/v1/1/list.php?a=list',
-          {},
-        );
-        const data = await response.json();
-        setAreaData(data.meals);
+        const areas = await fetchAreas();
+        setAreaData(areas);
       } catch (error) {
-        console.error('Error fetching initial data:', error);
+        console.error('Error fetching initial areas:', error);
       }
     };
-    
-    fetchInitialData();
+
+    fetchInitialAreas();
   }, []);
 
-  const fetchInitialData = async () => {
-    try {
-      const response = await fetch(
-        'https://www.themealdb.com/api/json/v1/1/search.php?s=',
-        {},
-      );
-      const data = await response.json();
-      setDishesData(data.meals);
-    } catch (error) {
-      console.error('Error fetching initial data:', error);
-    }
-  };
-
-  useEffect(() => {    
-    fetchInitialData();
-  }, []);
-
-  const fetchAllMeals = ()=>{
-    fetchInitialData();
-    setCurrCategory("Category")
-    setCurrArea("Area")
-  }
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchInitialMeals = async () => {
       try {
-        const response = await fetch(
-          `https://www.themealdb.com/api/json/v1/1/search.php?s=${searchTerm}`,
-          {},
-        );
-        const data = await response.json();
-        setDishesData(data.meals);
+        const meals = await fetchMeals();
+        setDishesData(meals);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching initial meals:', error);
       }
     };
 
-    if (searchTerm) {
-      fetchData();
-    }
+    fetchInitialMeals();
+  }, []);
+
+  useEffect(() => {
+    const fetchMealsBySearchTerm = async () => {
+      try {
+        if (searchTerm) {
+          const meals = await fetchMealsBySearch(searchTerm);
+          setDishesData(meals);
+        }
+      } catch (error) {
+        console.error('Error fetching meals by search term:', error);
+      }
+    };
+
+    fetchMealsBySearchTerm();
   }, [searchTerm]);
 
   const handleCategorySelect = async (category) => {
     try {
-      const response = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`);
-      const dat = await response.json();
-      
-      const mealDetailsPromises = dat.meals.map(async meal => {
-        const resp = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.idMeal}`);
-        return resp.json();
-      });
-  
-      const mealsDetails = await Promise.all(mealDetailsPromises);
-      const detailedMeals = mealsDetails.map(mealData => mealData.meals[0]);
-      setCurrCategory(category)
-      setDishesData(detailedMeals);
+      const meals = await fetchMealsByCategory(category);
+      setCurrCategory(category);
+      setDishesData(meals);
       setIsDropdownVisible(false);
-      setCurrArea("Area")
+      setCurrArea('Area');
     } catch (error) {
-      console.error('Error fetching data by category:', error);
+      console.error('Error fetching meals by category:', error);
     }
   };
 
   const handleAreaSelect = async (area) => {
     try {
-      const response = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?a=${area}`);
-      const dat = await response.json();
-      
-      const mealDetailsPromises = dat.meals.map(async meal => {
-        const resp = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.idMeal}`);
-        return resp.json();
-      });
-  
-      const mealsDetails = await Promise.all(mealDetailsPromises);
-      const detailedMeals = mealsDetails.map(mealData => mealData.meals[0]);
-      setCurrArea(area)
-      setDishesData(detailedMeals);
+      const meals = await fetchMealsByArea(area);
+      setCurrArea(area);
+      setDishesData(meals);
       setIsAreaDropdownVisible(false);
-      setCurrCategory("Category")
+      setCurrCategory('Category');
     } catch (error) {
-      console.error('Error fetching data by category:', error);
+      console.error('Error fetching meals by area:', error);
+    }
+  };
+
+  const fetchAllMeals = async () => {
+    try {
+      const meals = await fetchMeals();
+      setDishesData(meals);
+      setCurrCategory('Category');
+      setCurrArea('Area');
+    } catch (error) {
+      console.error('Error fetching all meals:', error);
     }
   };
   
@@ -161,87 +139,94 @@ const HomeScreen = () => {
   );
 
   return (
-    <ImageBackground
-      source={require('../img/image.png')}
-      style={styles.backgroundImage}>
-      <SafeAreaView style={styles.overlay}>
-        <FlatList
-          ListHeaderComponent={
-            <>
-              <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.openDrawer()}>
-                  <Image
-                    source={require('../img/left.png')}
-                    style={styles.icon}
-                  />
-                </TouchableOpacity>
-                <Text style={styles.title}>Order&Go</Text>
-                <TouchableOpacity>
-                  <Image
-                    source={require('../img/splash.png')}
-                    style={styles.icon}
-                  />
-                </TouchableOpacity>
-              </View>
+    <SafeAreaView style={styles.safeArea}>
+      <FlatList
+        ListHeaderComponent={
+          <>
+            <View style={styles.header}>
+              <TouchableOpacity onPress={() => navigation.openDrawer()}>
+                <Text style={styles.hamburger}>☰</Text>
+              </TouchableOpacity>
+              <Text style={styles.title}>Order&Go</Text>
+              <TouchableOpacity>
 
-              <View style={styles.searchContainer}>
-                <TextInput
-                  style={styles.searchInput}
-                  placeholder="Search here"
-                  value={searchTerm}
-                  onChangeText={(text) => setSearchTerm(text)}
-                />
-                <TouchableOpacity style={styles.filterButton}>
-                  <Image
-                    source={require('../img/filtre.png')}
-                    style={styles.filterIcon}
-                  />
-                </TouchableOpacity>
-              </View>
+              </TouchableOpacity>
+            </View>
 
-              <View style={styles.banner}>
+            <View style={styles.searchContainer}>
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search here"
+                value={searchTerm}
+                onChangeText={(text) => setSearchTerm(text)}
+              />
+              <TouchableOpacity style={styles.filterButton}>
                 <Image
-                  source={require('../img/banner2.png')}
-                  style={styles.bannerImage}
+                  source={require('../img/filtre.png')}
+                  style={styles.filterIcon}
                 />
-                <Text style={styles.bannerText}>Recipe in Minutes!</Text>
-                <Text style={styles.bannerSubText}>
-                  Available 1 August 2024
-                </Text>
-              </View>
+              </TouchableOpacity>
+            </View>
 
-              <View style={styles.tabsContainer}>
-                <TouchableOpacity style={styles.tabButton} onPress={() => fetchAllMeals()}>
-                  <Text style={styles.tabButtonText}>All</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabButton} onPress={() => setIsDropdownVisible(true)}>
-                  <Text style={styles.tabButtonText}>{currCategory}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tabButton} onPress={() => setIsAreaDropdownVisible(true)}>
-                  <Text style={styles.tabButtonText}>{currArea}</Text>
-                </TouchableOpacity>
-              </View>
-            </>
-          }
-          data={dishesData}
-          keyExtractor={item => item.idMeal}
-          renderItem={renderDish}
-          numColumns={2}
-          contentContainerStyle={styles.list}
-        />
-      </SafeAreaView>
+            <View style={styles.banner}>
+              <Image
+                source={require('../img/logoWithoutBG.png')}
+                style={styles.bannerImage}
+              />
+              <Text style={styles.bannerText}>Recipe in Minutes!</Text>
+              <Text style={styles.bannerSubText}>Available 1 August 2024</Text>
+            </View>
+
+            <View style={styles.tabsContainer}>
+              <TouchableOpacity
+                style={styles.tabButton}
+                onPress={() => fetchAllMeals()}
+              >
+                <Text style={styles.tabButtonText}>All</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.tabButton}
+                onPress={() => setIsDropdownVisible(true)}
+              >
+                <Text style={styles.tabButtonText}>{currCategory}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.tabButton}
+                onPress={() => setIsAreaDropdownVisible(true)}
+              >
+                <Text style={styles.tabButtonText}>{currArea}</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        }
+        data={dishesData}
+        keyExtractor={(item) => item.idMeal}
+        renderItem={renderDish}
+        numColumns={2}
+        contentContainerStyle={styles.list}
+      />
+
       <Modal
         visible={isDropdownVisible}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setIsDropdownVisible(false)}>
-        <TouchableOpacity style={styles.modalOverlay} onPress={() => setIsDropdownVisible(false)}>
+        onRequestClose={() => setIsDropdownVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          onPress={() => setIsDropdownVisible(false)}
+        >
           <View style={styles.dropdownContainer}>
             <ScrollView>
               {categData.map((category) => (
-                <TouchableOpacity key={category.idCategory} style={styles.dropdownItem}
-                                  onPress={() => handleCategorySelect(category.strCategory)}>
-                  <Text style={styles.dropdownItemText}>{category.strCategory}</Text>
+                <TouchableOpacity
+                  key={category.idCategory}
+                  style={styles.dropdownItem}
+                  onPress={() => handleCategorySelect(category.strCategory)}
+                >
+                  <Text style={styles.dropdownItemText}>
+                    {category.strCategory}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -253,13 +238,20 @@ const HomeScreen = () => {
         visible={isAreaDropdownVisible}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setIsAreaDropdownVisible(false)}>
-        <TouchableOpacity style={styles.modalOverlay} onPress={() => setIsAreaDropdownVisible(false)}>
+        onRequestClose={() => setIsAreaDropdownVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          onPress={() => setIsAreaDropdownVisible(false)}
+        >
           <View style={styles.dropdownContainer}>
             <ScrollView>
               {areaData.map((area) => (
-                <TouchableOpacity key={area.idArea} style={styles.dropdownItem}
-                                  onPress={() => handleAreaSelect(area.strArea)}>
+                <TouchableOpacity
+                  key={area.idArea}
+                  style={styles.dropdownItem}
+                  onPress={() => handleAreaSelect(area.strArea)}
+                >
                   <Text style={styles.dropdownItemText}>{area.strArea}</Text>
                 </TouchableOpacity>
               ))}
@@ -267,11 +259,15 @@ const HomeScreen = () => {
           </View>
         </TouchableOpacity>
       </Modal>
-    </ImageBackground>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#7dcbb7',
+  },
   backgroundImage: {
     flex: 1,
     resizeMode: 'cover',
@@ -291,8 +287,13 @@ const styles = StyleSheet.create({
     height: 24,
   },
   title: {
-    color: '#FFFFFF',
+    color: '#fff',
     fontSize: 24,
+    fontWeight: 'bold',
+  },
+  hamburger: {
+    color: '#fff',
+    fontSize: 28,
     fontWeight: 'bold',
   },
   searchContainer: {
@@ -331,7 +332,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   bannerText: {
-    color: '#FF6F61',
+    color: '#047a46',
     fontSize: 20,
     fontWeight: 'bold',
     textAlign: 'center',
@@ -355,7 +356,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   tabButtonText: {
-    color: '#FF6F61',
+    color: '#047a46',
     fontWeight: 'bold',
   },
   list: {
