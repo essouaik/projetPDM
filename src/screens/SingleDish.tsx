@@ -16,6 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { addItem } from '../redux/slices/cartSlice';
 import { fetchDishById } from '../api';
+import CartButton from '../components/CartButton';
 
 const SingleDish = ({ route }) => {
   const { dishId } = route.params;
@@ -162,6 +163,8 @@ const SingleDish = ({ route }) => {
           </View>
         </View>
       </ScrollView>
+      <CartButton navigation={navigation} />
+
     </View>
   );
 };

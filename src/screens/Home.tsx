@@ -20,6 +20,8 @@ import {
   fetchMealsByCategory,
   fetchMealsByArea,
 } from '../api';
+import { useSelector } from 'react-redux';
+import CartButton from '../components/CartButton';
 
 const HomeScreen = () => {
   const [dishesData, setDishesData] = useState([]);
@@ -31,6 +33,8 @@ const HomeScreen = () => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [isAreaDropdownVisible, setIsAreaDropdownVisible] = useState(false);
   const navigation = useNavigation();
+  const cartItems = useSelector((state) => state.cart.items);
+  const hasItemsInCart = cartItems.length > 0;
 
   // fetch all categories 
   useEffect(() => {
@@ -259,6 +263,7 @@ const HomeScreen = () => {
           </View>
         </TouchableOpacity>
       </Modal>
+      <CartButton navigation={navigation} />
     </SafeAreaView>
   );
 };
